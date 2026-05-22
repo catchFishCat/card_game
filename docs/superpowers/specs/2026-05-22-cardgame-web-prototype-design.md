@@ -1,273 +1,287 @@
-# Cardgame Web Prototype Design
+# 《福瑞勇者从不战败》Web 原型设计文档
 
-Date: 2026-05-22
+日期：2026-05-22
 
-## Goal
+## 目标
 
-Build a Web prototype for the first playable slice of `福瑞勇者从不战败`.
+制作《福瑞勇者从不战败》的第一版 Web 可玩原型。
 
-The prototype must validate the core loop:
+第一版原型要验证核心循环：
 
-1. Play a story segment.
-2. Enter card interaction.
-3. Trigger the next story segment from card interaction.
+1. 播放一段剧情。
+2. 进入卡牌交互。
+3. 通过卡牌交互触发下一段剧情。
 
-The first content pass includes both `1-1` and `1-2`.
+首批内容覆盖 `1-1` 和 `1-2`。
 
-## Source References
+## 参考资料
 
-Primary Feishu documents:
+主要飞书资料：
 
-- Wiki space: `7390585220017209345`
-- System doc: `https://my.feishu.cn/wiki/BPZiwa0wMieu1hkq0cFcE3Xan8e`
-- Script sheet: `剧情TimeLine`
-- Exploration timeline: `探索TimeLine / 1-1 / 1-2`
+- 知识库空间：[福瑞勇者从不战败](https://my.feishu.cn/wiki/space/7390585220017209345?ccm_open_type=lark_wiki_spaceLink&open_tab_from=wiki_home)
+- 策划案：[策划案](https://my.feishu.cn/wiki/N0luwJS2Ji6YzTkBJl4c3YCbnCh)
+- 系统案：[系统案](https://my.feishu.cn/wiki/BPZiwa0wMieu1hkq0cFcE3Xan8e)
+- 玩法案：[玩法案](https://my.feishu.cn/wiki/OlIlwaVygifLIIkAyOGcZG7EnVg)
+- 剧情表：[剧情TimeLine](https://my.feishu.cn/wiki/WIO4wyf7hiU5yAkTBGucsE0fnee)
+- 探索流程总览：[探索TimeLine](https://my.feishu.cn/wiki/S0LuwnautihkY7kX8y9cNJOEnue)
+- 探索流程 1-1：[1-1](https://my.feishu.cn/wiki/GyUZwSo0WiY8t9kLTjFc9eipnke)
+- 探索流程 1-2：[1-2](https://my.feishu.cn/wiki/Zo3ZwbccOiad1lkIJJScpwyjnye)
 
-Local reference images downloaded from the system doc:
+已从系统案下载到本地的参考图：
 
 - `docs/reference-images/system-normal-explore.png`
 - `docs/reference-images/system-story-view.png`
 - `docs/reference-images/system-card-detail.png`
 
-Local card style reference:
+现有卡牌风格参考：
 
 - `洛德_720.png`
 
-## Confirmed Constraints
+## 已确认约束
 
-- The first implementation is a Web prototype.
-- The first version should be data-driven, not hard-coded around only `1-1` and `1-2`.
-- A full editor is not part of this first prototype, but it is a confirmed future requirement.
-- Data structures must be editor-friendly from the start.
-- The card progress bar is optional. It represents special read-time, charge, or progress behavior for some cards only. Normal cards do not show a progress bar.
-- Generated card art should only cover the card face illustration. Card name, type, count, optional progress bar, and descriptions are rendered by UI and remain data-driven.
+- 第一版使用 Web 实现。
+- 第一版采用数据驱动方案，不把 `1-1`、`1-2` 写死在组件逻辑里。
+- 编辑器是后续确定要做的功能，但不包含在第一版原型内。
+- 数据结构从一开始就要方便未来编辑器读取和写入。
+- 卡牌进度条是可选设计，只用于部分有读条、蓄力、进度反馈需求的卡牌。
+- 普通卡牌不显示进度条。
+- 卡牌美术素材只生成“牌面插画”部分。
+- 卡牌名、卡牌类型、持有数量、可选进度条、描述文本等内容由前端 UI 根据数据动态渲染。
 
-## Architecture
+## 架构设计
 
-The prototype has four core runtime layers.
+第一版原型分为四个核心运行层。
 
 ### StoryPlayer
 
-Reads story segment data and plays steps in order.
+负责读取剧情段数据，并按顺序播放剧情步骤。
 
-Story steps can include:
+剧情步骤可以包括：
 
-- narration
-- character dialogue
-- screen effects such as blink, fade, shake, focus, black screen
-- card generation
-- card movement or reveal commands
-- story mode enter and exit
-- name prompt
-- transition to another segment
+- 旁白
+- 角色台词
+- 黑屏、眨眼、淡入淡出、屏幕震动、镜头聚焦等效果
+- 生成卡牌
+- 移动或显示卡牌
+- 进入剧情界面
+- 退出剧情界面
+- 弹出取名框
+- 跳转到下一段剧情
 
 ### CardBoard
 
-Owns the exploration UI defined by the system doc.
+负责系统案中的探索界面。
 
-The board has two main areas:
+界面分为两个主要区域：
 
-- Fixed system card area at the top for locations, important characters, prompts, and other special cards.
-- Free card area below for draggable player cards.
+- 顶部系统固定卡牌区：用于地点、重要角色、提示等系统卡牌。
+- 下方其他卡牌区：用于玩家可拖动的普通卡牌。
 
-Fixed-area cards are positioned by system rules and appear in chronological order. Free-area cards can be dragged by the player. Same-name cards may stack and increase count.
+固定卡牌区按系统规则排列，新出现的固定卡牌按时间顺序加入。其他卡牌区中的卡牌可由玩家自由拖动。同名卡牌可以堆叠，并增加持有数量。
 
 ### InteractionEngine
 
-Evaluates card interactions and emits results.
+负责判断卡牌交互，并产出交互结果。
 
-An interaction rule defines:
+一条交互规则描述：
 
-- source card
-- target card or target zone
-- conditions
-- resulting story segment or effects
+- 来源卡牌
+- 目标卡牌或目标区域
+- 可选触发条件
+- 触发后的结果
 
-Example: dragging skill card `我` onto `主角卡` triggers the `1-1` fusion sequence and then opens the name prompt.
+示例：把技能卡 `我` 拖到 `主角卡` 上，会触发 `1-1` 的融合演出，然后打开取名框。
 
 ### GameState
 
-Stores runtime progress:
+负责保存运行时状态：
 
-- current story segment
-- generated cards
-- card positions
-- card counts
-- stack state
-- player name
-- whether story mode is active
-- which cards are interactable during story mode
+- 当前剧情段
+- 已生成卡牌
+- 卡牌位置
+- 卡牌数量
+- 卡牌堆叠状态
+- 玩家名字
+- 当前是否处于剧情模式
+- 剧情模式下哪些卡牌允许交互
 
-## Data Model
+## 数据模型
 
 ### CardDefinition
 
-Static card definition.
+卡牌静态定义。
 
-Fields:
+字段包括：
 
 - `id`
 - `name`
 - `type`
 - `description`
 - `art`
-- `zone`: fixed or free
+- `zone`：固定区或自由区
 - `stackable`
-- optional `progress`
+- 可选 `progress`
 
-`progress` is absent for ordinary cards. When present, the UI renders a progress bar and related value.
+普通卡牌没有 `progress` 字段。只有配置了 `progress` 的卡牌才渲染进度条和相关数值。
 
 ### StorySegment
 
-A named sequence of story steps.
+剧情段。
 
-Fields:
+字段包括：
 
 - `id`
 - `title`
 - `steps`
-- optional `next`
+- 可选 `next`
 
-Story segments are content data, not component logic. This keeps the future editor path open.
+剧情段属于内容数据，不属于组件逻辑。这样后续编辑器可以直接编辑剧情段。
 
 ### StoryStep
 
-A discriminated step object.
+剧情步骤。
 
-Expected step types:
+第一版支持以下步骤类型：
 
-- `narration`
-- `dialogue`
-- `effect`
-- `spawnCard`
-- `focusCard`
-- `moveCard`
-- `renameCard`
-- `setInteractable`
-- `promptName`
-- `enterStoryMode`
-- `exitStoryMode`
-- `goto`
+- `narration`：旁白
+- `dialogue`：角色台词
+- `effect`：画面或镜头效果
+- `spawnCard`：生成卡牌
+- `focusCard`：聚焦卡牌
+- `moveCard`：移动卡牌
+- `renameCard`：卡牌更名
+- `setInteractable`：设置可交互卡牌
+- `promptName`：取名框
+- `enterStoryMode`：进入剧情界面
+- `exitStoryMode`：退出剧情界面
+- `goto`：跳转剧情段
 
 ### InteractionRule
 
-Describes a card interaction.
+卡牌交互规则。
 
-Fields:
+字段包括：
 
 - `id`
 - `sourceCardId`
-- `targetCardId` or `targetZone`
-- optional `conditions`
+- `targetCardId` 或 `targetZone`
+- 可选 `conditions`
 - `results`
 
-Results use the same command vocabulary as story steps where possible.
+`results` 尽量复用 `StoryStep` 的指令语义，避免剧情指令和交互指令分裂成两套系统。
 
 ### GameProgress
 
-Serializable runtime state.
+可序列化的运行时进度。
 
-This is shaped so a future editor/debugger can inspect it without reading component internals.
+它需要被设计成后续编辑器或调试面板可以直接查看的结构，而不是散落在组件内部。
 
-## UI Design
+## UI 设计
 
-The UI follows the `系统案` images as hard layout constraints.
+UI 以系统案三张图作为硬约束。
 
-### Normal Exploration View
+### 正常探索流程界面
 
-The normal exploration view contains:
+正常探索界面包含：
 
-- top fixed card area
-- lower free card area
-- freely draggable cards in the free area
+- 顶部系统固定卡牌区
+- 下方其他卡牌区
+- 可自由拖动的普通卡牌
 
-The fixed area sits at the lowest display layer. Newly generated fixed cards are arranged by time order. Players interact with fixed cards by dragging or using other cards.
+系统固定卡牌区位于较底层。新出现的固定卡牌按时间顺序排列。玩家通过其他卡牌与固定区卡牌发生交互。
 
-### Story View
+### 剧情界面
 
-When story mode starts:
+进入剧情模式后：
 
-- black bars appear at the top and bottom
-- the visible stage contracts vertically
-- NPC dialogue appears in the upper dialogue box with avatar on the right
-- protagonist dialogue appears in the lower dialogue box with avatar on the left
-- the corresponding dialogue box is hidden when no line is active
-- non-special cards fade out and become non-interactable
-- camera zoom, pan, and focus behavior remains available
+- 画面出现上下黑边。
+- 可视舞台区域纵向收缩。
+- NPC 对话框位于上方，头像在右侧。
+- 主角对话框位于下方，头像在左侧。
+- 当前没有对应台词时，隐藏对应对话框。
+- 除特定卡牌外，其他卡牌淡出并不可交互。
+- 保留镜头缩放、移动、聚焦能力。
 
-CG appears below dialogue boxes. When CG is displayed, the black bars restore to original dimensions according to the system doc.
+CG 层级位于对话框下方。展示 CG 时，黑边按系统案要求恢复到原尺寸。
 
-### Card View
+### 卡牌本体
 
-The card body renders:
+卡牌本体渲染：
 
-- card face art
-- card type
-- card name
-- count
-- optional progress bar
+- 牌面插画
+- 卡牌类型
+- 卡牌名
+- 持有数量
+- 可选进度条
 
-The progress bar appears only when the card definition includes progress behavior.
+进度条只在卡牌定义中存在进度配置时显示。
 
-### Card Detail Popover
+### 卡牌详情
 
-Hovering for a delay or clicking a card opens its detail panel.
+鼠标悬停一段时间或点击卡牌后，显示卡牌详情。
 
-The detail panel contains:
+详情面板包含：
 
-- card face art
-- card type
-- card name
-- count
-- card description
+- 牌面插画
+- 卡牌类型
+- 卡牌名
+- 持有数量
+- 卡牌描述
 
-The panel appears to the left or right of the card based on available space.
+详情面板根据卡牌周围空间，显示在卡牌左侧或右侧。
 
-## First Playable Flow
+## 第一版可玩流程
 
 ### 1-1
 
-Start in the `1-1 intro` story segment.
+从 `1-1 intro` 剧情段开始。
 
-Flow:
+流程：
 
-1. Begin with black screen and blink effects.
-2. Show the protagonist card.
-3. Spawn skill card `我`.
-4. Enter forced tutorial state.
-5. Only allow dragging `我` onto `主角卡`.
-6. On successful drag, play fusion effect: card frame break, `我` dissolves into protagonist card, protagonist card lights up.
-7. Open name prompt.
-8. Save player name.
-9. Continue to `1-2`.
+1. 黑屏开始，播放眨眼效果。
+2. 显示主角卡。
+3. 生成技能卡 `我`。
+4. 进入强制教学状态。
+5. 只允许把 `我` 拖到 `主角卡`。
+6. 拖拽成功后播放融合效果：卡牌框碎裂，`我` 溶解到主角卡上，主角卡亮起。
+7. 弹出取名框。
+8. 保存玩家输入的名字。
+9. 进入 `1-2`。
 
 ### 1-2
 
-Enter exploration state and spawn:
+进入探索状态，生成以下卡牌：
 
 - `树`
 - `草地`
 - `纹身`
 - `双手`
 
-The first prototype implements the key progression interaction:
+第一版先实现关键推进交互：
 
-- `双手` or protagonist action interacts with `树`.
-- The tree interaction triggers the climb sequence.
-- Generate or focus `黑日`.
-- Play the black sun discovery story.
-- Continue into the Harvey encounter.
-- Generate `???` and later rename it to `哈维`.
+- 使用 `双手` 或主角相关操作与 `树` 交互。
+- 树交互触发爬树剧情。
+- 生成或聚焦 `黑日`。
+- 播放发现黑日的剧情。
+- 继续进入哈维登场剧情。
+- 生成 `???`，后续更名为 `哈维`。
 
-The first prototype ends after Harvey appears and enters dialogue.
+第一版原型停在哈维出现并进入对话的状态。
 
-## Asset Strategy
+## 素材策略
 
-Card face art is generated with image generation and references the existing `洛德_720.png` card style and approximate proportions.
+卡牌牌面美术使用图像生成，参考现有 `洛德_720.png` 的卡牌风格和大致比例。
 
-Generated art should only include the illustration/card-face area. It must not include card name, card type, count, progress bar, description text, or other variable UI labels.
+生成图只包含牌面插画区域，不能把以下内容烘进图片：
 
-Initial card face needs:
+- 卡牌名
+- 卡牌类型
+- 持有数量
+- 进度条
+- 卡牌描述
+- 其他可变 UI 文本
+
+第一版需要的牌面素材：
 
 - 主角 / 洛德
 - 技能：我
@@ -278,70 +292,70 @@ Initial card face needs:
 - 地点 / 提示：黑日
 - 角色：哈维 / ???
 
-## Future Editor Requirement
+## 后续编辑器要求
 
-The editor is confirmed as a future requirement.
+编辑器是已确认的后续需求。
 
-The first prototype will not build the editor UI, but must avoid implementation choices that block it. In practice this means:
+第一版不做编辑器 UI，但实现时必须避免阻碍未来编辑器。具体要求：
 
-- content lives in structured data files
-- story commands and interaction rules are explicit
-- card definitions are reusable
-- runtime state is inspectable and serializable
-- component logic does not encode content-specific progression directly
+- 内容存放在结构化数据文件中。
+- 剧情指令和交互规则显式表达。
+- 卡牌定义可复用。
+- 运行状态可检查、可序列化。
+- 组件逻辑中不直接写死具体剧情推进。
 
-Future editor surfaces should be able to edit:
+未来编辑器至少需要能编辑：
 
-- card definitions
-- story segments
-- story steps
-- interaction rules
-- generated card placement
-- optional progress behavior
+- 卡牌定义
+- 剧情段
+- 剧情步骤
+- 交互规则
+- 生成卡牌的位置
+- 可选进度条行为
 
-## Non-Goals For First Prototype
+## 第一版不做的内容
 
-The first prototype does not include:
+第一版不包含：
 
-- full visual novel feature set
-- battle system
-- shop
-- achievements
-- gallery
-- save/load UX
-- editor UI
-- production-quality generated art for every future card
+- 完整 AVG 功能集
+- 战斗系统
+- 商店
+- 成就
+- 画廊
+- 存档/读档 UI
+- 编辑器 UI
+- 所有未来卡牌的正式美术
 
-## Acceptance Criteria
+## 验收标准
 
-- `1-1` can be played from the start.
-- The player can drag `我` onto `主角卡`.
-- The fusion/tutorial interaction advances the story.
-- The player can enter a name.
-- `1-2` exploration starts after `1-1`.
-- The relevant cards spawn in the correct exploration view.
-- Cards in the free area can be dragged.
-- The tree interaction triggers the black sun story.
-- Harvey appears and the prototype reaches the planned stopping point.
-- Story mode, exploration mode, and card detail UI follow the `系统案` reference layouts.
-- Ordinary cards do not show progress bars.
-- Cards configured with progress behavior can show a progress bar.
-- Content data and runtime logic are separated enough to support a future editor.
+- 可以从头播放 `1-1`。
+- 玩家可以把 `我` 拖到 `主角卡`。
+- 融合/教学交互能推进剧情。
+- 玩家可以输入名字。
+- `1-1` 结束后进入 `1-2` 探索。
+- 关键卡牌在正确的探索界面中生成。
+- 其他卡牌区的卡牌可以拖动。
+- 树交互可以触发发现黑日的剧情。
+- 哈维出现，并到达第一版计划终点。
+- 剧情态、探索态、卡牌详情态符合系统案参考图的布局逻辑。
+- 普通卡牌不显示进度条。
+- 配置了进度行为的卡牌可以显示进度条。
+- 内容数据和运行逻辑分离，足以支撑后续编辑器。
 
-## Testing Notes
+## 测试建议
 
-Manual playtest paths:
+手动测试路径：
 
-- full `1-1` to `1-2` happy path
-- attempt invalid drag during forced tutorial
-- inspect card detail popover on cards with and without progress
-- verify non-special cards cannot be interacted with during story mode
-- reset and replay from start
+- 从 `1-1` 到 `1-2` 的完整正向流程。
+- 强制教学阶段尝试无效拖拽。
+- 检查有进度条和无进度条卡牌的详情展示。
+- 检查剧情模式下非特定卡牌是否不可交互。
+- 重置后从头重新播放。
 
-Implementation-level tests should focus on:
+实现层测试重点：
 
-- story step reducer behavior
-- interaction rule matching
-- card stacking/count behavior
-- progress bar rendering only when configured
-- `GameState` serialization shape
+- 剧情步骤 reducer 行为。
+- 交互规则匹配。
+- 卡牌堆叠与计数。
+- 仅配置进度行为的卡牌显示进度条。
+- `GameState` 的序列化结构。
