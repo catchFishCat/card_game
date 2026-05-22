@@ -129,10 +129,8 @@ button {
 }
 
 .card-view--emphasis {
-  animation: cardPulse 1s infinite;
-  box-shadow:
-    0 0 26px color-mix(in srgb, var(--accent) 74%, white),
-    0 18px 32px rgba(41, 30, 15, 0.28);
+  outline: 2px solid color-mix(in srgb, var(--accent) 58%, white);
+  box-shadow: 0 18px 30px rgba(41, 30, 15, 0.22);
 }
 
 .card-view--disabled {
@@ -280,6 +278,14 @@ button {
   z-index: 20;
 }
 
+.story-advance-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 19;
+  cursor: pointer;
+  background: transparent;
+}
+
 .story-overlay__bar {
   position: absolute;
   left: 0;
@@ -415,18 +421,6 @@ button {
 .debug-panel span {
   color: #625a4e;
   font-size: 12px;
-}
-
-@keyframes cardPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.07);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
 }
 
 @media (max-width: 760px) {

@@ -52,7 +52,18 @@ export function App() {
 
   function submitName(name: string) {
     setGameState((state) => {
-      const named = { ...state, playerName: name, awaitingName: false };
+      const named = {
+        ...state,
+        playerName: name,
+        awaitingName: false,
+        cards: {
+          ...state.cards,
+          protagonist: {
+            ...state.cards.protagonist,
+            name
+          }
+        }
+      };
       return advanceStory(named, storySegments);
     });
   }
@@ -69,6 +80,9 @@ export function App() {
         onDropCard={handleDropCard}
         onInspect={setInspectedCard}
       />
+      {gameState.storyMode ? (
+        <button className="story-advance-layer" type="button" aria-label="点击继续剧情" onClick={advance} />
+      ) : null}
       {gameState.storyMode ? <StoryOverlay activeLine={gameState.activeLine} speakerName={gameState.playerName} /> : null}
       {gameState.awaitingName ? <NamePrompt defaultName={gameState.playerName} onSubmit={submitName} /> : null}
       <CardDetailPopover card={inspectedCard} definition={inspectedDefinition} onClose={() => setInspectedCard(undefined)} />

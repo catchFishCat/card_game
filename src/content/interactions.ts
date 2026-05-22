@@ -26,7 +26,6 @@ export const interactions: InteractionRule[] = [
         results: [
           { type: 'card.breakFrame', cardId: 'skill_self', durationMs: 450 },
           { type: 'card.dissolve', cardId: 'skill_self', durationMs: 900, removeAfter: true },
-          { type: 'card.emphasize', cardId: 'protagonist', style: { kind: 'success', mode: 'strongGlow' }, durationMs: 900 },
           { type: 'ui.promptName', variable: 'playerName' },
           { type: 'story.goto', segmentId: '1-2:start' }
         ]
@@ -88,7 +87,6 @@ export const interactions: InteractionRule[] = [
         previewText: '这副兽人的躯体更加灵活，洛德三两下就爬到了树梢处。',
         results: [
           { type: 'story.narration', text: '这副兽人的躯体更加灵活，{playerName}三两下就爬到了树梢处。' },
-          { type: 'card.emphasize', cardId: 'tree', style: { kind: 'storyFocus', mode: 'strongGlow' }, durationMs: 1000 },
           { type: 'story.goto', segmentId: '1-2:black-sun' }
         ]
       },

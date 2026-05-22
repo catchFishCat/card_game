@@ -16,14 +16,11 @@ export const storySegments: StorySegment[] = [
       ],
       [
         { type: 'card.spawn', cardId: 'protagonist', zone: 'fixed', position: { x: 50, y: 20 } },
-        { type: 'card.emphasize', cardId: 'protagonist', style: { kind: 'guide', mode: 'pulseGlow' }, durationMs: 1200 },
         { type: 'story.dialogue', speakerId: 'protagonist', text: '我……还活着？' }
       ],
       [
         { type: 'card.spawn', cardId: 'skill_self', zone: 'free', position: { x: 50, y: 60 } },
-        { type: 'story.exitMode' },
-        { type: 'card.emphasize', cardId: 'skill_self', style: { kind: 'guide', mode: 'pulseGlow' }, durationMs: 1600 },
-        { type: 'card.emphasize', cardId: 'protagonist', style: { kind: 'guide', mode: 'pulseGlow' }, durationMs: 1600 }
+        { type: 'story.exitMode' }
       ]
     ]
   },
@@ -36,8 +33,7 @@ export const storySegments: StorySegment[] = [
         { type: 'card.spawn', cardId: 'tree', zone: 'fixed', position: { x: 45, y: 34 } },
         { type: 'card.spawn', cardId: 'tattoo', zone: 'fixed', position: { x: 61, y: 34 } },
         { type: 'card.spawn', cardId: 'hands', zone: 'free', position: { x: 63, y: 55 } },
-        { type: 'card.spawn', cardId: 'grass', zone: 'fixed', position: { x: 54, y: 70 } },
-        { type: 'card.emphasize', cardId: 'tree', style: { kind: 'guide', mode: 'pulseGlow' }, durationMs: 1400 }
+        { type: 'card.spawn', cardId: 'grass', zone: 'fixed', position: { x: 54, y: 70 } }
       ]
     ]
   },
@@ -47,7 +43,6 @@ export const storySegments: StorySegment[] = [
     steps: [
       [
         { type: 'card.spawn', cardId: 'black_sun', zone: 'fixed', position: { x: 75, y: 20 } },
-        { type: 'card.emphasize', cardId: 'black_sun', style: { kind: 'storyFocus', mode: 'strongGlow' }, durationMs: 1400 },
         { type: 'story.narration', text: '越过树冠，天空中悬着一轮不该存在的黑色太阳。' }
       ],
       [
@@ -55,7 +50,6 @@ export const storySegments: StorySegment[] = [
       ],
       [
         { type: 'card.spawn', cardId: 'unknown_harvey', zone: 'fixed', position: { x: 27, y: 22 } },
-        { type: 'card.emphasize', cardId: 'unknown_harvey', style: { kind: 'storyFocus', mode: 'strongGlow' }, durationMs: 1000 },
         { type: 'story.dialogue', speakerId: 'unknown_harvey', text: '别一直盯着它看。你会被它记住。' }
       ],
       [
