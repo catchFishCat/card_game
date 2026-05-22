@@ -58,10 +58,7 @@ export function CardBoard({ instances, definitions, onPickCard, onMoveCard, onDr
                 if (draggingId !== card.instanceId) return;
                 const targetId = findDropTarget(event.clientX, event.clientY, card.instanceId);
                 setHoverTargetId(targetId);
-                const targetCard = targetId ? instances.find((item) => item.instanceId === targetId) : undefined;
-                const position = targetCard
-                  ? { x: targetCard.position.x, y: clamp(targetCard.position.y + 7, 8, 92) }
-                  : toBoardPosition(event.clientX, event.clientY);
+                const position = toBoardPosition(event.clientX, event.clientY);
                 if (position) onMoveCard(card.instanceId, position);
               }}
               onPointerUp={(event) => {
