@@ -31,13 +31,22 @@ export function App() {
   }
 
   function handlePickCard(instanceId: string) {
-    setGameState((state) => applyValidTargetHighlights(state, instanceId));
+    setGameState((state) => {
+      const highlighted = applyValidTargetHighlights(state, instanceId);
+      const nextZIndex = Math.max(0, ...highlighted.cardInstances.map((card) => card.zIndex)) + 1;
+      return {
+        ...highlighted,
+        cardInstances: highlighted.cardInstances.map((card) =>
+          card.instanceId === instanceId ? { ...card, zIndex: nextZIndex } : card
+        )
+      };
+    });
   }
 
   function handleMoveCard(instanceId: string, position: Position) {
     setGameState((state) => ({
       ...state,
-      cardInstances: state.cardInstances.map((card) => (card.instanceId === instanceId ? { ...card, position, zIndex: 99 } : card))
+      cardInstances: state.cardInstances.map((card) => (card.instanceId === instanceId ? { ...card, position } : card))
     }));
   }
 

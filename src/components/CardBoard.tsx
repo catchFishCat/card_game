@@ -14,6 +14,7 @@ type CardBoardProps = {
 export function CardBoard({ instances, definitions, onPickCard, onMoveCard, onDropCard, onInspect }: CardBoardProps) {
   const boardRef = useRef<HTMLDivElement>(null);
   const [draggingId, setDraggingId] = useState<string>();
+  const [hoverTargetId, setHoverTargetId] = useState<string>();
   const visibleCards = instances.filter((card) => card.visible);
 
   function toBoardPosition(clientX: number, clientY: number): Position | undefined {
@@ -23,6 +24,14 @@ export function CardBoard({ instances, definitions, onPickCard, onMoveCard, onDr
       x: clamp(((clientX - rect.left) / rect.width) * 100, 4, 96),
       y: clamp(((clientY - rect.top) / rect.height) * 100, 8, 92)
     };
+  }
+
+  function findDropTarget(clientX: number, clientY: number, sourceId: string) {
+    return document
+      .elementsFromPoint(clientX, clientY)
+      .map((element) => element.closest<HTMLElement>('[data-card-instance]'))
+      .find((element) => element && element.dataset.cardInstance !== sourceId && element.classList.contains('card-view--highlight'))
+      ?.dataset.cardInstance;
   }
 
   return (
@@ -37,24 +46,30 @@ export function CardBoard({ instances, definitions, onPickCard, onMoveCard, onDr
               key={card.instanceId}
               card={card}
               definition={definition}
+              isDragging={draggingId === card.instanceId}
+              isDropPreview={hoverTargetId === card.instanceId}
               onPointerDown={(event) => {
                 event.currentTarget.setPointerCapture(event.pointerId);
                 setDraggingId(card.instanceId);
+                setHoverTargetId(undefined);
                 onPickCard(card.instanceId);
               }}
               onPointerMove={(event) => {
                 if (draggingId !== card.instanceId) return;
-                const position = toBoardPosition(event.clientX, event.clientY);
+                const targetId = findDropTarget(event.clientX, event.clientY, card.instanceId);
+                setHoverTargetId(targetId);
+                const targetCard = targetId ? instances.find((item) => item.instanceId === targetId) : undefined;
+                const position = targetCard
+                  ? { x: targetCard.position.x, y: clamp(targetCard.position.y + 7, 8, 92) }
+                  : toBoardPosition(event.clientX, event.clientY);
                 if (position) onMoveCard(card.instanceId, position);
               }}
               onPointerUp={(event) => {
                 if (draggingId !== card.instanceId) return;
                 event.currentTarget.releasePointerCapture(event.pointerId);
                 setDraggingId(undefined);
-                const targetId = document
-                  .elementsFromPoint(event.clientX, event.clientY)
-                  .map((element) => element.closest<HTMLElement>('[data-card-instance]'))
-                  .find((element) => element && element.dataset.cardInstance !== card.instanceId)?.dataset.cardInstance;
+                const targetId = hoverTargetId ?? findDropTarget(event.clientX, event.clientY, card.instanceId);
+                setHoverTargetId(undefined);
                 onDropCard(card.instanceId, targetId);
               }}
               onInspect={onInspect}

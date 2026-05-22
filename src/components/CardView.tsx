@@ -4,6 +4,8 @@ import type { CardDefinition, CardInstance } from '../domain/types';
 type CardViewProps = {
   card: CardInstance;
   definition: CardDefinition;
+  isDragging?: boolean;
+  isDropPreview?: boolean;
   onPointerDown?: (event: PointerEvent, card: CardInstance) => void;
   onPointerMove?: (event: PointerEvent, card: CardInstance) => void;
   onPointerUp?: (event: PointerEvent, card: CardInstance) => void;
@@ -19,7 +21,16 @@ const typeLabel: Record<CardDefinition['type'], string> = {
   hint: '提示'
 };
 
-export function CardView({ card, definition, onPointerDown, onPointerMove, onPointerUp, onInspect }: CardViewProps) {
+export function CardView({
+  card,
+  definition,
+  isDragging,
+  isDropPreview,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onInspect
+}: CardViewProps) {
   const progress = definition.progress
     ? Math.round((((card.progressValue ?? definition.progress.initial ?? 0) / definition.progress.max) * 100))
     : undefined;
@@ -28,6 +39,8 @@ export function CardView({ card, definition, onPointerDown, onPointerMove, onPoi
     `card-view--${definition.type}`,
     card.highlightState ? 'card-view--highlight' : '',
     card.emphasisState ? 'card-view--emphasis' : '',
+    isDragging ? 'card-view--dragging' : '',
+    isDropPreview ? 'card-view--drop-preview' : '',
     !card.enabled ? 'card-view--disabled' : ''
   ]
     .filter(Boolean)
