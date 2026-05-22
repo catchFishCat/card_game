@@ -303,7 +303,7 @@ button {
   position: absolute;
   inset: 0;
   z-index: 19;
-  cursor: pointer;
+  cursor: default;
   background: transparent;
 }
 
